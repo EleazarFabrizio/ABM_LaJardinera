@@ -7,6 +7,10 @@ import os
 base_datos = sqlite3.connect('LaJardinera.bd')
 cursor = base_datos.cursor()
 
+cursor.execute('SELECT * FROM producto')
+product = cursor.fetchall()
+print(product)
+
 def seleccionar_imagen():
     global imagen_bytes, proveedor_opciones, categoria_opciones
     ruta_imagen = filedialog.askopenfilename()
@@ -34,13 +38,19 @@ def guardar_producto():
 
     cursor.execute('INSERT INTO producto (nombre, precio, cantidad, id_proveedor, id_categoria, imagen) VALUES (?,?,?,?,?,?)',
                    (nombre, precio, cantidad, id_proveedor[0], id_categoria[0], imagen))
-    
+    base_datos.commit()
+
     messagebox.showinfo('Completado','El producto ha sido guardado con éxito.')
+
+    cursor.execute('SELECT * FROM producto')
+    product = cursor.fetchall()
+    print(product)
     producto_nombre_entry.delete(0, 'end')
     producto_precio_entry.delete(0, 'end')
     producto_cantidad_entry.delete(0, 'end')
     proveedor_seleccionada.set('Seleccionar Proveedor')
     categoria_seleccionada.set('Seleccionar Categoria')
+    nombre_imagen_label.config(text='')
 
 def agregar_proveedor(a):
     ventana_agregar_proveedor = Toplevel(a)
@@ -88,7 +98,7 @@ def agregar_proveedor(a):
 
         cursor.execute('INSERT INTO proveedor (razon_social, cuit, domicilio, numero_telefono, email) VALUES (?,?,?,?,?)',
                (razon_social, cuit, domicilio, numeroTelefono, email))
-
+        base_datos.commit()
         
         messagebox.showinfo('Completado','El proveedor ha sido guardado con éxito.')
         ventana_agregar_proveedor.destroy()
@@ -99,12 +109,40 @@ def agregar_proveedor(a):
 def consultar_proveedores():
     cursor.execute("SELECT razon_social FROM proveedor")
     proveedores = cursor.fetchall()
+    base_datos.commit()
     print(proveedores)
     return ['Seleccionar Proveedor'] + [nombre[0] for nombre in proveedores]
+
+def agregar_categoria(a):
+    ventana_agregar_categoria = Toplevel(a)
+    ventana_agregar_categoria.title('Agregar Categoria')
+
+    agregar_categoria_label = Label(ventana_agregar_categoria, text='Agregar Categoria')
+    agregar_categoria_label.grid(row=0, column=0, columnspan=2)
+
+    categoria_nombre_label = Label(ventana_agregar_categoria, text='Nombre: ')
+    categoria_nombre_label.grid(row=1, column=0)
+
+    categoria_nombre_entry = Entry(ventana_agregar_categoria)
+    categoria_nombre_entry.grid(row=1, column=1)
+
+    def guardar_categoria():
+        nombre = categoria_nombre_entry.get()
+
+        cursor.execute('INSERT INTO categoria (nombre) VALUES (?)',
+               (nombre,))
+        base_datos.commit()
+        
+        messagebox.showinfo('Completado','La categoria ha sido guardada con éxito.')
+        ventana_agregar_categoria.destroy()
+
+    boton_guardar_proveedor = Button(ventana_agregar_categoria, text='Guardar', command=guardar_categoria)
+    boton_guardar_proveedor.grid(row=6, column=0, columnspan=2)
 
 def consultar_categorias():
     cursor.execute("SELECT nombre FROM categoria")
     categoria = cursor.fetchall()
+    base_datos.commit()
     return ['Seleccionar Categoria'] + [nombre[0] for nombre in categoria]
 
 ventana_agregar_producto = Tk()
@@ -156,7 +194,7 @@ categoria_seleccionada.set(categoria_opciones[0])
 producto_categoria_opciones = OptionMenu(ventana_agregar_producto, categoria_seleccionada, *categoria_opciones)
 producto_categoria_opciones.grid(row=5, column=1)
 
-boton_agregar_categoria = Button(ventana_agregar_producto, text='+', command='')
+boton_agregar_categoria = Button(ventana_agregar_producto, text='+', command=lambda:agregar_categoria(ventana_agregar_producto))
 boton_agregar_categoria.grid(row=5, column=2)
 
 boton_agregar_imagen = Button(ventana_agregar_producto, text='Agregar Imagen', command=seleccionar_imagen)
@@ -165,7 +203,7 @@ boton_agregar_imagen.grid(row=6, column=0, columnspan=3)
 nombre_imagen_label = Label(ventana_agregar_producto, text='')
 nombre_imagen_label.grid(row=7, column=0, columnspan=3)
 
-boton_agregar_producto = Button(ventana_agregar_producto, text='Agregar Prodcuto', command='')
+boton_agregar_producto = Button(ventana_agregar_producto, text='Agregar Prodcuto', command=guardar_producto)
 boton_agregar_producto.grid(row=8, column=0, columnspan=3)
 
 ventana_agregar_producto.mainloop()
