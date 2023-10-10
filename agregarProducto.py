@@ -7,10 +7,8 @@ import os
 base_datos = sqlite3.connect('LaJardinera.bd')
 cursor = base_datos.cursor()
 
-
-
 def seleccionar_imagen():
-    global imagen_bytes
+    global imagen_bytes, proveedor_opciones, categoria_opciones
     ruta_imagen = filedialog.askopenfilename()
     if ruta_imagen:
         nombre_archivo = os.path.basename(ruta_imagen)
@@ -20,16 +18,6 @@ def seleccionar_imagen():
 
     nombre_imagen_label.config(text = nombre_archivo_var)
 
-def consultar_proveedores():
-    cursor.execute("SELECT razon_social FROM proveedor")
-    proveedores = cursor.fetchall()
-    return ['Seleccionar Proveedor'] + [nombre[0] for nombre in proveedores]
-
-def consultar_categorias():
-    cursor.execute("SELECT nombre FROM categoria")
-    categoria = cursor.fetchall()
-    return ['Seleccionar Categoria'] + [nombre[0] for nombre in categoria]
-
 def guardar_producto():
     nombre = producto_nombre_entry.get()
     precio = producto_precio_entry.get()
@@ -38,14 +26,14 @@ def guardar_producto():
     categoria = categoria_seleccionada.get()
     imagen = imagen_bytes
     
-    cursor.execute('SELECT id_proveedor FROM proveedor WHERE razon_social = ?'(proveedor, ))
+    cursor.execute('SELECT id_proveedor FROM proveedor WHERE razon_social = ?', (proveedor, ))
     id_proveedor = cursor.fetchone()
 
-    cursor.execute('SELECT id_categoria FROM categoria WHERE nombre = ?'(categoria))
+    cursor.execute('SELECT id_categoria FROM categoria WHERE nombre = ?', (categoria, ))
     id_categoria = cursor.fetchone()
 
-    cursor.execute('INSERT INTO producto (nombre, precio, cantidad, id_proveedor, id_categoria, imagen) VALUES (?,?,?,?,?,?)'
-                   (nombre, precio, cantidad, id_proveedor, id_categoria, imagen))
+    cursor.execute('INSERT INTO producto (nombre, precio, cantidad, id_proveedor, id_categoria, imagen) VALUES (?,?,?,?,?,?)',
+                   (nombre, precio, cantidad, id_proveedor[0], id_categoria[0], imagen))
     
     messagebox.showinfo('Completado','El producto ha sido guardado con éxito.')
     producto_nombre_entry.delete(0, 'end')
@@ -98,8 +86,9 @@ def agregar_proveedor(a):
         numeroTelefono = proveedor_telefono_entry.get()
         email = proveedor_email_entry.get()
 
-        cursor.execute('INSERT INTO proveedor (razon_social, cuit, domicilio, numero_telefono, email) VALUES (?,?,?,?,?)'
-                       (razon_social, cuit, domicilio, numeroTelefono, email))
+        cursor.execute('INSERT INTO proveedor (razon_social, cuit, domicilio, numero_telefono, email) VALUES (?,?,?,?,?)',
+               (razon_social, cuit, domicilio, numeroTelefono, email))
+
         
         messagebox.showinfo('Completado','El proveedor ha sido guardado con éxito.')
         ventana_agregar_proveedor.destroy()
@@ -107,8 +96,19 @@ def agregar_proveedor(a):
     boton_guardar_proveedor = Button(ventana_agregar_proveedor, text='Guardar', command=guardar_proveedor)
     boton_guardar_proveedor.grid(row=6, column=0, columnspan=2)
 
+def consultar_proveedores():
+    cursor.execute("SELECT razon_social FROM proveedor")
+    proveedores = cursor.fetchall()
+    print(proveedores)
+    return ['Seleccionar Proveedor'] + [nombre[0] for nombre in proveedores]
+
+def consultar_categorias():
+    cursor.execute("SELECT nombre FROM categoria")
+    categoria = cursor.fetchall()
+    return ['Seleccionar Categoria'] + [nombre[0] for nombre in categoria]
 
 ventana_agregar_producto = Tk()
+
 ventana_agregar_producto.title('Agregar Producto')
 ventana_agregar_producto.resizable(height=False, width=False)
 
@@ -169,3 +169,7 @@ boton_agregar_producto = Button(ventana_agregar_producto, text='Agregar Prodcuto
 boton_agregar_producto.grid(row=8, column=0, columnspan=3)
 
 ventana_agregar_producto.mainloop()
+
+
+
+
