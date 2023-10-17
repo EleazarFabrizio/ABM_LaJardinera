@@ -1,9 +1,11 @@
 from tkinter import *
-import sqlite3
+import tkinter as tk
+from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
+import sqlite3
 import os
-from tkinter import ttk
+
 
 base_datos = sqlite3.connect('LaJardinera.bd')
 cursor = base_datos.cursor()
@@ -12,7 +14,6 @@ cursor.execute('SELECT * FROM producto')
 product = cursor.fetchall()
 print(product)
 
-    
 
 def agregar_proveedor(a):
     ventana_agregar_proveedor = Toplevel(a)
@@ -65,7 +66,7 @@ def agregar_proveedor(a):
         messagebox.showinfo('Completado','El proveedor ha sido guardado con éxito.')
         ventana_agregar_proveedor.destroy()
 
-    boton_guardar_proveedor = ttk.Button(ventana_agregar_proveedor, text='Guardar', command=guardar_proveedor)
+    boton_guardar_proveedor = Button(ventana_agregar_proveedor, text='Guardar', command=guardar_proveedor)
     boton_guardar_proveedor.grid(row=6, column=0, columnspan=2)
 
 def consultar_proveedores():
@@ -79,13 +80,13 @@ def agregar_categoria(a):
     ventana_agregar_categoria = Toplevel(a)
     ventana_agregar_categoria.title('Agregar Categoria')
 
-    agregar_categoria_label = ttk.Label(ventana_agregar_categoria, text='Agregar Categoria')
+    agregar_categoria_label = Label(ventana_agregar_categoria, text='Agregar Categoria')
     agregar_categoria_label.grid(row=0, column=0, columnspan=2)
 
-    categoria_nombre_label = ttk.Label(ventana_agregar_categoria, text='Nombre: ')
+    categoria_nombre_label = Label(ventana_agregar_categoria, text='Nombre: ')
     categoria_nombre_label.grid(row=1, column=0)
 
-    categoria_nombre_entry = ttk.Entry(ventana_agregar_categoria)
+    categoria_nombre_entry = Entry(ventana_agregar_categoria)
     categoria_nombre_entry.grid(row=1, column=1)
 
     def guardar_categoria():
@@ -98,7 +99,7 @@ def agregar_categoria(a):
         messagebox.showinfo('Completado','La categoria ha sido guardada con éxito.')
         ventana_agregar_categoria.destroy()
 
-    boton_guardar_proveedor = ttk.Button(ventana_agregar_categoria, text='Guardar', command=guardar_categoria)
+    boton_guardar_proveedor = Button(ventana_agregar_categoria, text='Guardar', command=guardar_categoria)
     boton_guardar_proveedor.grid(row=6, column=0, columnspan=2)
 
 def consultar_categorias():
@@ -107,7 +108,7 @@ def consultar_categorias():
     base_datos.commit()
     return ['Seleccionar Categoria'] + [nombre[0] for nombre in categoria]
 
-def loles():
+def ventana_nuevo_producto(a):
 
     def seleccionar_imagen():
         global imagen_bytes
@@ -151,7 +152,7 @@ def loles():
         nombre_imagen_label.config(text='')
 
 
-    ventana_agregar_producto = Tk()
+    ventana_agregar_producto = Toplevel(a)
 
     ventana_agregar_producto.title('Agregar Producto')
     ventana_agregar_producto.resizable(height=False, width=False)
@@ -215,6 +216,66 @@ def loles():
     ventana_agregar_producto.mainloop()
 
 
+def consultar_producto(a):        
+    
+    ventana_consulta = Toplevel(a)
+    ventana_consulta.title('Consultar productos')
+    ancho_ventana = 820  # Cambia este valor al ancho deseado de la ventana
+    alto_ventana = 500   # Cambia este valor a la altura deseada de la ventana
+    ventana_consulta.resizable(0,0)
+    """ ventana_consulta.config(bg="#010101")"""
+    # Obtener las dimensiones de la pantalla
+    ancho_pantalla = ventana_consulta.winfo_screenwidth()
+    alto_pantalla = ventana_consulta.winfo_screenheight()
+
+    # Calcular las coordenadas x e y para centrar la ventana
+    x = (ancho_pantalla - ancho_ventana) // 2
+    y = (alto_pantalla - alto_ventana) // 2
+
+    # Establecer el tamaño y la posición de la ventana
+    ventana_consulta.geometry(f"{ancho_ventana}x{alto_ventana}+{x}+{y}")
 
 
-loles()
+    tipo_filtro = ttk.Label (ventana_consulta, text= 'Filtro')
+    tipo_filtro.grid(row=0, column=0, pady=(25,20), padx=(30,0), sticky=W)
+    """Completar tema flitro"""
+
+
+    buscar_nombre = ttk.Label (ventana_consulta, text= "Buscar por nombre: ")
+    buscar_nombre.grid(row=1, column=0, padx=(30,0),sticky=W)
+    busqueda = ttk.Entry(ventana_consulta, width=40)
+    busqueda.grid(row=1, column=0, sticky=E, padx=(20,0)) 
+
+
+    tree_consulta = ttk.Treeview(ventana_consulta, columns=("Clave primaria" ,"Código producto","Nombre", "Cantidad", "Precio por metro"),)
+    
+    tree_consulta.heading("#2", text="Código producto")
+    tree_consulta.heading("#3", text="Nombre")
+    tree_consulta.heading("#4", text="Cantidad")
+    tree_consulta.heading("#5", text="Precio por metro")
+    tree_consulta.column("#0", width=0, stretch=tk.NO)  # Ocultar la columna #0 que habitualmente muestra las primary key de los objetos
+
+    tree_consulta.grid(column=0, columnspan=20, padx=10, pady=20, row=3)
+
+    tree_consulta.column("#2", anchor=tk.CENTER)  
+    tree_consulta.column("#3", anchor=tk.CENTER) 
+    tree_consulta.column("#4", anchor=tk.CENTER)  
+    tree_consulta.column("#5", anchor=tk.CENTER) 
+    tree_consulta.column("#1", width=0, stretch=tk.NO)  # Ocultar la columna #0 que habitualmente muestra las primary key de los objetos
+    tree_consulta.grid(padx=10, pady=10)
+
+
+    nuevo_button = ttk.Button(ventana_consulta, text="Nuevo", command= lambda : ventana_nuevo_producto(ventana_consulta) )
+    nuevo_button.grid(pady=15, row=5)
+
+    editar_button = ttk.Button(ventana_consulta, text="Editar")
+    editar_button.grid(pady=15, padx=(350, 0), row=5, sticky="E")
+
+
+    eliminar_button= ttk.Button(ventana_consulta, text="Eliminar")
+    eliminar_button.grid(pady=15, padx=(150,0), row=5, sticky="w", column=1)
+
+    
+
+
+        

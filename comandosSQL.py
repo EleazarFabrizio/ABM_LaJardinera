@@ -34,3 +34,4 @@ cursor.execute('''
     nombre VARCHAR(255)   
     )
 ''')
+
