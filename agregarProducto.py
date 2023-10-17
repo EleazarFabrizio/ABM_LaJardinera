@@ -10,9 +10,6 @@ cursor = base_datos.cursor()
 
 cursor.execute('SELECT * FROM producto')
 product = cursor.fetchall()
-print(product)
-
-    
 
 def agregar_proveedor(a):
     ventana_agregar_proveedor = Toplevel(a)
@@ -107,8 +104,33 @@ def consultar_categorias():
     base_datos.commit()
     return ['Seleccionar Categoria'] + [nombre[0] for nombre in categoria]
 
-def loles():
 
+
+def guardar_producto():
+    nombre = producto_nombre_entry.get()
+    precio = producto_precio_entry.get()
+    cantidad = producto_cantidad_entry.get()
+    proveedor = proveedor_seleccionada.get()
+    categoria = categoria_seleccionada.get()
+    
+    cursor.execute('SELECT id_proveedor FROM proveedor WHERE razon_social = ?', (proveedor, ))
+    id_proveedor = cursor.fetchone()
+
+    cursor.execute('SELECT id_categoria FROM categoria WHERE nombre = ?', (categoria, ))
+    id_categoria = cursor.fetchone()
+
+    cursor.execute('INSERT INTO producto (nombre, precio, cantidad, id_proveedor, id_categoria) VALUES (?,?,?,?,?)',
+                (nombre, precio, cantidad, id_proveedor[0], id_categoria[0]))
+    base_datos.commit()
+
+    messagebox.showinfo('Completado','El producto ha sido guardado con éxito.')
+
+    producto_nombre_entry.delete(0, 'end')
+    producto_precio_entry.delete(0, 'end')
+    producto_cantidad_entry.delete(0, 'end')
+    proveedor_seleccionada.set('Seleccionar Proveedor')
+    categoria_seleccionada.set('Seleccionar Categoria')
+    
     def seleccionar_imagen():
         global imagen_bytes
         ruta_imagen = filedialog.askopenfilename()
@@ -120,101 +142,64 @@ def loles():
 
         nombre_imagen_label.config(text = nombre_archivo_var)
 
-    def guardar_producto():
-        nombre = producto_nombre_entry.get()
-        precio = producto_precio_entry.get()
-        cantidad = producto_cantidad_entry.get()
-        proveedor = proveedor_seleccionada.get()
-        categoria = categoria_seleccionada.get()
-        imagen = imagen_bytes
-        
-        cursor.execute('SELECT id_proveedor FROM proveedor WHERE razon_social = ?', (proveedor, ))
-        id_proveedor = cursor.fetchone()
 
-        cursor.execute('SELECT id_categoria FROM categoria WHERE nombre = ?', (categoria, ))
-        id_categoria = cursor.fetchone()
+ventana_agregar_producto = Tk()
 
-        cursor.execute('INSERT INTO producto (nombre, precio, cantidad, id_proveedor, id_categoria, imagen) VALUES (?,?,?,?,?,?)',
-                    (nombre, precio, cantidad, id_proveedor[0], id_categoria[0], imagen))
-        base_datos.commit()
+ventana_agregar_producto.title('Agregar Producto')
+ventana_agregar_producto.resizable(height=False, width=False)
 
-        messagebox.showinfo('Completado','El producto ha sido guardado con éxito.')
+agregar_producto_titulo = ttk.Label(ventana_agregar_producto, text='Agregar Productos')
+agregar_producto_titulo.grid(row=0, column=0, columnspan=3)
 
-        cursor.execute('SELECT * FROM producto')
-        product = cursor.fetchall()
-        print(product)
-        producto_nombre_entry.delete(0, 'end')
-        producto_precio_entry.delete(0, 'end')
-        producto_cantidad_entry.delete(0, 'end')
-        proveedor_seleccionada.set('Seleccionar Proveedor')
-        categoria_seleccionada.set('Seleccionar Categoria')
-        nombre_imagen_label.config(text='')
+producto_nombre_label = ttk.Label(ventana_agregar_producto, text='Nombre: ')
+producto_nombre_label.grid(row=1, column=0)
 
+producto_nombre_entry= ttk.Entry(ventana_agregar_producto)
+producto_nombre_entry.grid(row=1, column=1)
 
-    ventana_agregar_producto = Tk()
+producto_precio_label = ttk.Label(ventana_agregar_producto, text='Precio: ')
+producto_precio_label.grid(row=2, column=0)
 
-    ventana_agregar_producto.title('Agregar Producto')
-    ventana_agregar_producto.resizable(height=False, width=False)
+producto_precio_entry = ttk.Entry(ventana_agregar_producto)
+producto_precio_entry.grid(row=2, column=1)
 
-    agregar_producto_titulo = ttk.Label(ventana_agregar_producto, text='Agregar Productos')
-    agregar_producto_titulo.grid(row=0, column=0, columnspan=3)
+producto_cantidad_label = ttk.Label(ventana_agregar_producto, text='Cantidad: ')
+producto_cantidad_label.grid(row=3, column=0)
 
-    producto_nombre_label = ttk.Label(ventana_agregar_producto, text='Nombre: ')
-    producto_nombre_label.grid(row=1, column=0)
+producto_cantidad_entry = ttk.Entry(ventana_agregar_producto)
+producto_cantidad_entry.grid(row=3, column=1)
 
-    producto_nombre_entry= ttk.Entry(ventana_agregar_producto)
-    producto_nombre_entry.grid(row=1, column=1)
+producto_proveedor_label = ttk.Label(ventana_agregar_producto, text='Proveedor: ')
+producto_proveedor_label.grid(row=4, column=0)
 
-    producto_precio_label = ttk.Label(ventana_agregar_producto, text='Precio: ')
-    producto_precio_label.grid(row=2, column=0)
+proveedor_opciones = consultar_proveedores()
+proveedor_seleccionada = StringVar()
+proveedor_seleccionada.set(proveedor_opciones[0])
 
-    producto_precio_entry = ttk.Entry(ventana_agregar_producto)
-    producto_precio_entry.grid(row=2, column=1)
+producto_proveedor_opciones = OptionMenu(ventana_agregar_producto, proveedor_seleccionada, *proveedor_opciones )
+producto_proveedor_opciones.grid(row=4, column=1)
 
-    producto_cantidad_label = ttk.Label(ventana_agregar_producto, text='Cantidad: ')
-    producto_cantidad_label.grid(row=3, column=0)
+boton_agregar_proveedor = ttk.Button(ventana_agregar_producto, text='+', command=lambda:agregar_proveedor(ventana_agregar_producto))
+boton_agregar_proveedor.grid(row=4, column=2)
 
-    producto_cantidad_entry = ttk.Entry(ventana_agregar_producto)
-    producto_cantidad_entry.grid(row=3, column=1)
+producto_categoria_label = ttk.Label(ventana_agregar_producto, text='Categoria: ')
+producto_categoria_label.grid(row=5, column=0)
 
-    producto_proveedor_label = ttk.Label(ventana_agregar_producto, text='Proveedor: ')
-    producto_proveedor_label.grid(row=4, column=0)
+categoria_opciones = consultar_categorias()
+categoria_seleccionada = StringVar()
+categoria_seleccionada.set(categoria_opciones[0])
 
-    proveedor_opciones = consultar_proveedores()
-    proveedor_seleccionada = StringVar()
-    proveedor_seleccionada.set(proveedor_opciones[0])
+producto_categoria_opciones = OptionMenu(ventana_agregar_producto, categoria_seleccionada, *categoria_opciones)
+producto_categoria_opciones.grid(row=5, column=1)
 
-    producto_proveedor_opciones = OptionMenu(ventana_agregar_producto, proveedor_seleccionada, *proveedor_opciones )
-    producto_proveedor_opciones.grid(row=4, column=1)
+boton_agregar_categoria = ttk.Button(ventana_agregar_producto, text='+', command=lambda:agregar_categoria(ventana_agregar_producto))
+boton_agregar_categoria.grid(row=5, column=2)
 
-    boton_agregar_proveedor = ttk.Button(ventana_agregar_producto, text='+', command=lambda:agregar_proveedor(ventana_agregar_producto))
-    boton_agregar_proveedor.grid(row=4, column=2)
+boton_agregar_producto = ttk.Button(ventana_agregar_producto, text='Agregar Prodcuto', command=guardar_producto)
+boton_agregar_producto.grid(row=8, column=0, columnspan=3)
 
-    producto_categoria_label = ttk.Label(ventana_agregar_producto, text='Categoria: ')
-    producto_categoria_label.grid(row=5, column=0)
-
-    categoria_opciones = consultar_categorias()
-    categoria_seleccionada = StringVar()
-    categoria_seleccionada.set(categoria_opciones[0])
-
-    producto_categoria_opciones = OptionMenu(ventana_agregar_producto, categoria_seleccionada, *categoria_opciones)
-    producto_categoria_opciones.grid(row=5, column=1)
-
-    boton_agregar_categoria = ttk.Button(ventana_agregar_producto, text='+', command=lambda:agregar_categoria(ventana_agregar_producto))
-    boton_agregar_categoria.grid(row=5, column=2)
-
-    boton_agregar_imagen = ttk.Button(ventana_agregar_producto, text='Agregar Imagen', command=seleccionar_imagen)
-    boton_agregar_imagen.grid(row=6, column=0, columnspan=3)
-
-    nombre_imagen_label = ttk.Label(ventana_agregar_producto, text='')
-    nombre_imagen_label.grid(row=7, column=0, columnspan=3)
-
-    boton_agregar_producto = ttk.Button(ventana_agregar_producto, text='Agregar Prodcuto', command=guardar_producto)
-    boton_agregar_producto.grid(row=8, column=0, columnspan=3)
-
-    ventana_agregar_producto.mainloop()
+ventana_agregar_producto.mainloop()
 
 
 
 
-loles()

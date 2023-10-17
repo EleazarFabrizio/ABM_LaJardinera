@@ -13,16 +13,15 @@ def on_resize(event):
 
 ventanaInicio = Tk()
 
-
-ancho_pantalla = int(ventanaInicio.winfo_screenwidth() / 2)
-alto_pantalla = int(ventanaInicio.winfo_screenheight() / 2)
+ancho_pantalla = int(ventanaInicio.winfo_screenwidth())
+alto_pantalla = int(ventanaInicio.winfo_screenheight())
 
 ventanaInicio.bind("<Configure>", on_resize)
 ventanaInicio.geometry(f"{ancho_pantalla}x{alto_pantalla}")
 """ventanaInicio.config(bg="#010101")"""
+
 ventanaInicio.title('La Jardinera')
 """ventanaInicio.resizable(height=False, width=False)"""
-
 
 menu = ttk.Label(ventanaInicio, text='Inicio')
 menu.pack(pady=50)
@@ -35,8 +34,5 @@ boton_consultar_proveedor.pack(pady=30,ipady= 5)
 
 boton_consultar_informes = ttk.Button(ventanaInicio, text= 'Consultar informes', width=25)
 boton_consultar_informes.pack(pady=30, ipady= 5)
-
-
-
 
 ventanaInicio.mainloop()

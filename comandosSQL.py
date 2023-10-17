@@ -2,6 +2,7 @@ import sqlite3
 
 base_datos = sqlite3.connect('LaJardinera.bd')
 cursor = base_datos.cursor()
+#imagen BLOB Para imagenes en la base de datos. 
 
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS producto(
@@ -11,7 +12,6 @@ cursor.execute('''
     cantidad FlOAT NOT NULL,
     id_proveedor INT,
     id_categoria INT,
-    imagen BLOB,
     FOREIGN KEY (id_proveedor) REFERENCES proveedor(id_proveedor),
     FOREIGN KEY (id_categoria) REFERENCES categoria(id_categoria)   
     )
